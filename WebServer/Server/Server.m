@@ -6,14 +6,17 @@
 //  Copyright © 2020 Apollo Software. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import <CoreFoundation/CoreFoundation.h>
-#import <sys/socket.h>
-#import <netinet/in.h>
+#include <Foundation/Foundation.h>
+#include <CommonCrypto/CommonCrypto.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
-#import "Server.h"
-#import "ReqRes.h"
-#import "RequestHandler.h"
+#include "ReqRes.h"
+#include "RequestHandler.h"
+#include "WebSocket.h"
+#include "Server.h"
+
+#include <curses.h>
 
 @implementation Server : NSObject
 
@@ -22,9 +25,12 @@
 -(instancetype) init:(unsigned int) _port {
     if(self = [super init]){
         // Initialize self.
-        port = _port;
         handlers = [[NSMutableArray alloc] init];
+        socketHandlers = [[NSMutableDictionary alloc] init];
+        
         _listening = false;
+        port = _port;
+        webSockets = [[NSMutableArray alloc] init];
     }
     
     return self;
@@ -63,8 +69,14 @@
     }
     
     /// This may be useful for development (it will allow you to bypass the TIME_WAIT after a socket closes):
-    // int soReusePort = 1;
-    // setsockopt(serverFd, SOL_SOCKET, SO_REUSEPORT, &soReusePort, sizeof(soReusePort));
+    int soReusePort = 0;
+    if (soReusePort) {
+        setsockopt(serverFd, SOL_SOCKET, SO_REUSEPORT, &soReusePort, sizeof(soReusePort));
+        
+        move(12, 0);
+        addstr("SECURITY WARNING: SO_REUSEPORT = 1");
+        move(0, 0);
+    }
     
     // Start listening for connections.
     if(bind(serverFd, (struct sockaddr*) &serverAddress, sizeof(serverAddress)) == -1){
@@ -119,7 +131,71 @@
                 requestData.headers = payloadLines;
                 
                 Request *request = [[Request alloc] init: &requestData];
-                [self callHandlers:clientFd forRequest: request];
+                
+                /* START: Perform WebSocket checks */
+                bool isWebSocket = true;
+                
+                /**
+                 Check 1: the HTTP version must be greater than or equal to HTTP/1.1 (the only two older versions are HTTP 0.9 and HTTP 1.0)
+                 */
+                isWebSocket &= !([request.httpVersion isEqualToString:@"HTTP/0.9"] || [request.httpVersion isEqualToString:@"HTTP/1.0"]);
+                
+                /**
+                 Check 2: The HTTP method MUST be GET.
+                 */
+                isWebSocket &= request.method == GET;
+                
+                /**
+                 Check 3: The appropriate Upgrade headers must be present.
+                 */
+                isWebSocket &= [[[request header:@"connection"] lowercaseString] isEqualToString:@"upgrade"];   // Connection: Upgrade
+                isWebSocket &= [[[request header:@"upgrade"] lowercaseString] isEqualToString:@"websocket"];    // Upgrade: websocket
+                
+                /**
+                 Check 4: The Sec-WebSocket-Key header must be present.
+                 */
+                isWebSocket &= [request header:@"Sec-WebSocket-Key"] != NULL;
+                /* END: Perform WebSocket checks */
+                
+                if (isWebSocket) {
+                    
+                    // Perform the initial handshake.
+                    NSString *key = [request header:@"Sec-WebSocket-Key"];
+                    NSString *acceptance = [NSString stringWithFormat:@"%@%@", key, WS_MAGIC_STRING];
+                    
+                    const char *data = [acceptance UTF8String];
+                    
+                    // Compute an SHA1 digest of the acceptance string to produce a valid
+                    // Sec-WebSocket-Accept header.
+                    unsigned char digest[CC_SHA1_DIGEST_LENGTH];
+                    CC_SHA1(data, (CC_LONG) strlen(data), digest);
+                    
+                    NSData *digestData = [[NSData alloc] initWithBytes:digest length:sizeof(digest)];
+                    NSString *accept = [digestData base64EncodedStringWithOptions:0/** = no options */];
+                    
+                    // Send the HTTP acknowledgement for WebSocket communications.
+                    NSMutableString *ackPayload = [[NSMutableString alloc] initWithString:@"HTTP/1.1 101 Switching Protocols\r\n"];
+                    [ackPayload appendString:@"Upgrade: websocket\r\n"];
+                    [ackPayload appendString:@"Connection: Upgrade\r\n"];
+                    [ackPayload appendFormat:@"%@%@%@", @"Sec-WebSocket-Accept: ", accept, @"\r\n"];
+                    [ackPayload appendString:@"\r\n"];
+                    
+                    const char* buffer = [ackPayload UTF8String];
+                    write(clientFd, buffer, strlen(buffer));
+                    
+                    WebSocket *socket = [[WebSocket alloc] init:clientFd performDispatchTasksOn:self->serverConnectionsGroup];
+                    [self->webSockets addObject:socket];
+                    
+                    // Now hand over control to the WebSocket handler.
+                    // TODO: Implement WebSocket handler APIs.
+                    
+                } else {
+                    
+                    // Call the request handlers to compute the response.
+                    [self callHandlers:clientFd forRequest: request];
+                    
+                }
+                
             });
         }
         
@@ -139,9 +215,9 @@
     [response setHeader:@"Content-Type" value:@"text/html"];
     [response setHeader:@"Connection" value:@"Close"];
     
-    // If the request method is invalid, simply return a 405 (Method Not Allowed)
     if(request.method == NULL){
         
+        // If the request method is invalid, simply return a 405 (Method Not Allowed)
         [response status:@405];
         
     } else {
@@ -174,7 +250,7 @@
     
     // Finally, convert this to a buffer and output to the socket.
     const char* buffer = [payload UTF8String];
-    write(socket, buffer, [payload length]);
+    write(socket, buffer, strlen(buffer));
     close(socket);
     
 }
@@ -183,6 +259,12 @@
     
     RequestHandler *handler = [[RequestHandler alloc] init:(Method) method forPath:(NSString*) path andWithBlock:(RequestBlock) block];
     [handlers addObject:handler];
+    
+}
+
+-(void) onWebSocketConnection:(NSString*) path execute:(WebSocketConnectionBlock) block {
+    
+    [socketHandlers setValue:block forKey:path];
     
 }
 

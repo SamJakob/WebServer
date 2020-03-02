@@ -30,6 +30,10 @@ int main(int argc, const char * argv[]) {
             [response write:@"<p>hi</p>"];
         }];
         
+        [server onWebSocketConnection:@"/socket" execute:^(Request* request, WebSocket* socket){
+            
+        }];
+        
         // The block parameter is set to false as, on account of the CLI,
         // we do not want to block the main thread.
         [server start:false];

@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CoreFoundation/CoreFoundation.h>
 
 #import "ReqRes.h"
 

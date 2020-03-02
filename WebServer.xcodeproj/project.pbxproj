@@ -11,6 +11,7 @@
 		3991DDBF2409A13E00E7C786 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 3991DDBE2409A13E00E7C786 /* Server.m */; };
 		3991DDC72409C76300E7C786 /* ReqRes.m in Sources */ = {isa = PBXBuildFile; fileRef = 3991DDC62409C76300E7C786 /* ReqRes.m */; };
 		3991DDCE2409D1D300E7C786 /* RequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 3991DDCD2409D1D300E7C786 /* RequestHandler.m */; };
+		39C8C4B0240C646A005F6696 /* WebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 39C8C4AF240C646A005F6696 /* WebSocket.m */; };
 		39DF042A240927E100401B5D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 39DF0429240927E100401B5D /* main.m */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +36,8 @@
 		3991DDC82409C76E00E7C786 /* ReqRes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ReqRes.h; sourceTree = "<group>"; };
 		3991DDCC2409D1D300E7C786 /* RequestHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RequestHandler.h; sourceTree = "<group>"; };
 		3991DDCD2409D1D300E7C786 /* RequestHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RequestHandler.m; sourceTree = "<group>"; };
+		39C8C4AF240C646A005F6696 /* WebSocket.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WebSocket.m; sourceTree = "<group>"; };
+		39C8C4B1240C6478005F6696 /* WebSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebSocket.h; sourceTree = "<group>"; };
 		39DF0426240927E100401B5D /* WebServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = WebServer; sourceTree = BUILT_PRODUCTS_DIR; };
 		39DF0429240927E100401B5D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -68,6 +71,8 @@
 				3991DDBE2409A13E00E7C786 /* Server.m */,
 				3991DDC82409C76E00E7C786 /* ReqRes.h */,
 				3991DDC62409C76300E7C786 /* ReqRes.m */,
+				39C8C4B1240C6478005F6696 /* WebSocket.h */,
+				39C8C4AF240C646A005F6696 /* WebSocket.m */,
 			);
 			path = Server;
 			sourceTree = "<group>";
@@ -160,6 +165,7 @@
 				3991DDBF2409A13E00E7C786 /* Server.m in Sources */,
 				3991DDCE2409D1D300E7C786 /* RequestHandler.m in Sources */,
 				39DF042A240927E100401B5D /* main.m in Sources */,
+				39C8C4B0240C646A005F6696 /* WebSocket.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,6 +285,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-L/usr/local/opt/ncurses/lib",
 					"-lncursesw",
@@ -291,6 +298,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-L/usr/local/opt/ncurses/lib",
 					"-lncursesw",

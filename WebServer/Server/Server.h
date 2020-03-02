@@ -11,13 +11,11 @@
 
 #import "ReqRes.h"
 #import "RequestHandler.h"
+#import "WebSocket.h"
 
 @interface Server : NSObject {
     /// The port number that the webserver should run on.
     unsigned int port;
-    
-    /// The array of request handlers.
-    NSMutableArray<RequestHandler*> *handlers;
     
 @private
     /// Whether or not the server should continue listening to connections.
@@ -29,16 +27,28 @@
     
     /// The dispatch group for handling connections to the server.
     dispatch_group_t serverConnectionsGroup;
+    
+    /// The array of request handlers.
+    NSMutableArray<RequestHandler*> *handlers;
+    
+    /// The dictionary of websocket handlers (mapping path to handler)
+    NSMutableDictionary<NSString*, WebSocketConnectionBlock> *socketHandlers;
+    
+    /// The array of connected sockets - used to avoid handshaking multiple times and to pass socket communications to
+    /// the correct socket handler.
+    NSMutableArray<WebSocket*> *webSockets;
 }
 
 /// Whether or not the server is listening on a given port.
 @property (readonly) bool listening;
 
 -(instancetype) init:(unsigned int) _port;
--(void) on:(Method) method path:(NSString*) path execute:(RequestBlock) block;
 -(void) start;
 -(void) start:(bool) block;
 -(void) halt;
+
+-(void) on:(Method) method path:(NSString*) path execute:(RequestBlock) block;
+-(void) onWebSocketConnection:(NSString*) path execute:(WebSocketConnectionBlock) block;
 @end
 
 #endif /* Server_h */
