@@ -19,7 +19,7 @@ and the repository also includes a very basic simple ncurses-based CLI.
 [server onWebSocketConnection:@"/echo" execute:^(Request* request, WebSocket* socket){
 
   [socket onMessage:^(NSString* message){
-    // Simply sends the recieved message back to the client.
+    // Simply sends the received message back to the client.
     [socket sendString:message];
   }];
 
