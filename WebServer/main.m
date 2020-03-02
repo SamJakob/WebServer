@@ -32,6 +32,10 @@ int main(int argc, const char * argv[]) {
         
         [server onWebSocketConnection:@"/socket" execute:^(Request* request, WebSocket* socket){
             
+            [socket onMessage:^(NSString* message){
+                [socket sendString:message];
+            }];
+            
         }];
         
         // The block parameter is set to false as, on account of the CLI,

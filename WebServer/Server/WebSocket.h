@@ -13,18 +13,26 @@
 
 static const NSString *WS_MAGIC_STRING = @"258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
+typedef void (^WebSocketMessageBlock)(NSString* payload);
+
 @interface WebSocket : NSObject {
     
     
 
 @private
+    dispatch_group_t dispatchGroup;
+    
     /// The POSIX descriptor of the WebSocket connection.
     int socketDescriptor;
 
+    /// The array of WebSocket message handlers
+    NSMutableArray<WebSocketMessageBlock> *messageHandlers;
 }
 
 -(instancetype) init:(int) socketDescriptor performDispatchTasksOn:(dispatch_group_t) dispatchGroup;
 -(bool) represents:(int) socketDescriptor;
+-(void) onMessage:(WebSocketMessageBlock) messageHandler;
+-(void) sendString:(NSString*) data;
 @end
 
 typedef void (^WebSocketConnectionBlock)(Request* request, WebSocket* socket);

@@ -69,7 +69,7 @@
     }
     
     /// This may be useful for development (it will allow you to bypass the TIME_WAIT after a socket closes):
-    int soReusePort = 0;
+    int soReusePort = 1;
     if (soReusePort) {
         setsockopt(serverFd, SOL_SOCKET, SO_REUSEPORT, &soReusePort, sizeof(soReusePort));
         
@@ -188,6 +188,10 @@
                     
                     // Now hand over control to the WebSocket handler.
                     // TODO: Implement WebSocket handler APIs.
+                    for(NSString *path in self->socketHandlers){
+                        WebSocketConnectionBlock socketHandler = self->socketHandlers[path];
+                        socketHandler(request, socket);
+                    }
                     
                 } else {
                     
