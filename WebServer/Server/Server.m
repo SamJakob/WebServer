@@ -157,7 +157,18 @@
                 isWebSocket &= [request header:@"Sec-WebSocket-Key"] != NULL;
                 /* END: Perform WebSocket checks */
                 
-                if (isWebSocket) {
+                // Check if there is a WebSocket handler for the specified
+                // request path. If not, we won't bother trying to upgrade the
+                // connection.
+                bool hasWebSocketHandler = false;
+                for (NSString* path in self->socketHandlers) {
+                    if ([path isEqual:request.path]) {
+                        hasWebSocketHandler = true;
+                        break;
+                    }
+                }
+                
+                if (isWebSocket && hasWebSocketHandler) {
                     
                     // Perform the initial handshake.
                     NSString *key = [request header:@"Sec-WebSocket-Key"];
@@ -187,8 +198,9 @@
                     [self->webSockets addObject:socket];
                     
                     // Now hand over control to the WebSocket handler.
-                    // TODO: Implement WebSocket handler APIs.
-                    for(NSString *path in self->socketHandlers){
+                    for(NSString* path in self->socketHandlers){
+                        if ([path isNotEqualTo:request.path]) continue;
+                        
                         WebSocketConnectionBlock socketHandler = self->socketHandlers[path];
                         socketHandler(request, socket);
                     }

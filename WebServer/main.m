@@ -22,7 +22,7 @@ int main(int argc, const char * argv[]) {
         Server *server = [[Server alloc] init: PORT];
         
         [server on:GET path:@"/" execute:^(Request* request, Response* response){
-            [response append:@"<p>hi</p>"];
+            [response append:@"<h1>Objective-C kinda neat tho</h1>"];
         }];
         
         [server on:GET path:@"/delay" execute:^(Request* request, Response* response){
@@ -30,10 +30,20 @@ int main(int argc, const char * argv[]) {
             [response write:@"<p>hi</p>"];
         }];
         
+        [server onWebSocketConnection:@"/socket2" execute:^(Request* request, WebSocket* socket){
+            
+            [socket onMessage:^(NSString* message){
+                if ([message isEqualToString:@"ping"]) [socket sendString:@"fatass!"];
+                else [socket sendString:message];
+            }];
+            
+        }];
+        
         [server onWebSocketConnection:@"/socket" execute:^(Request* request, WebSocket* socket){
             
             [socket onMessage:^(NSString* message){
-                [socket sendString:message];
+                if ([message isEqualToString:@"ping"]) [socket sendString:@"Pong!"];
+                else [socket sendString:message];
             }];
             
         }];

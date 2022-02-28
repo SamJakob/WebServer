@@ -129,7 +129,7 @@
 		39DF041E240927E100401B5D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1120;
+				LastUpgradeCheck = 1320;
 				ORGANIZATIONNAME = "Apollo Software";
 				TargetAttributes = {
 					39DF0425240927E100401B5D = {
@@ -198,6 +198,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -256,6 +257,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -284,10 +286,11 @@
 		39DF042E240927E100401B5D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
-					"-L/usr/local/opt/ncurses/lib",
+					"-L/opt/local/lib/",
 					"-lncursesw",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -297,10 +300,11 @@
 		39DF042F240927E100401B5D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
-					"-L/usr/local/opt/ncurses/lib",
+					"-L/opt/local/lib/",
 					"-lncursesw",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
